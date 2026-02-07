@@ -98,9 +98,9 @@ void planner(
         return (int)map[GETMAPINDEX(x,y,x_size,y_size)];
     };
 
-    int goalposeX = target_traj[curr_time+1];
-    int goalposeY = target_traj[curr_time+target_steps+1];
-    printf("goal: %d %d;\n", goalposeX, goalposeY);
+    int goalposeX = target_traj[curr_time];
+    int goalposeY = target_traj[curr_time+target_steps];
+    // printf("goal: %d %d;\n", goalposeX, goalposeY);
 
     std::vector<int> g_values = init_gvalues(x_size, y_size);
 
@@ -123,6 +123,7 @@ void planner(
         open_list.pop();
 
         // add s to CLOSED
+        if (closed_list.count(s)) continue;
         closed_list.insert(s);
 
         // for every neighbor s` of s such that s` is not in CLOSED
@@ -134,7 +135,7 @@ void planner(
         std::vector<int> neighbors = get_neighbors(s);
         for (int s_p : neighbors)
         {
-            if (closed_list.find(s_p) == closed_list.end()) {
+            if (closed_list.find(s_p) == closed_list.end() && is_map_index_valid(GETXFROMINDEX(s_p, x_size), GETYFROMINDEX(s_p, x_size))) {
                 int cost = g_values[s] + calc_cost(s_p);
                 if (g_values[s_p] > cost)
                 {
@@ -152,10 +153,10 @@ void planner(
     while (parent[cur] != -1 && parent[cur] != S_start) {
         cur = parent[cur];
     }
-
+    // printf("is valid move: %d\n", is_map_index_valid(GETXFROMINDEX(cur, x_size), GETYFROMINDEX(cur, x_size)));
     action_ptr[0] = GETXFROMINDEX(cur, x_size);
     action_ptr[1] = GETYFROMINDEX(cur, x_size);
     
-    printf("\n");
+    // printf("\n");
     return;
 }

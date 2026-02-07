@@ -185,11 +185,11 @@ int main(int argc, char *argv[])
         float thresh = 0.5;
         targetposeX = target_traj[curr_time];
         targetposeY = target_traj[curr_time + target_steps];
-        std::cout << "targetposeX: " << targetposeX << std::endl;
-        std::cout << "targetposeY: " << targetposeY << std::endl;
-        std::cout << "robotposeX: " << robotposeX << std::endl;
-        std::cout << "robotposeY: " << robotposeY << std::endl;
-        std::cout << "Time: " << curr_time << std::endl;
+        // std::cout << "targetposeX: " << targetposeX << std::endl;
+        // std::cout << "targetposeY: " << targetposeY << std::endl;
+        // std::cout << "robotposeX: " << robotposeX << std::endl;
+        // std::cout << "robotposeY: " << robotposeY << std::endl;
+        // std::cout << "Time: " << curr_time << std::endl;
         if (abs(robotposeX - targetposeX) <= thresh && abs(robotposeY-targetposeY) <= thresh)
         {
             caught = true;
