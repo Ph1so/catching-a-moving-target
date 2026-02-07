@@ -27,6 +27,8 @@
 
 #define NUMOFDIRS 8
 
+int num_goals_passsed = 1;
+
 std::vector<int> init_gvalues(int x_size, int y_size)
 {
     const int INF = std::numeric_limits<int>::max();
@@ -104,10 +106,22 @@ void planner(
         int y = GETYFROMINDEX(node_index, x_size);
         return (int)map[GETMAPINDEX(x,y,x_size,y_size)];
     };
+    
     int latest_goal = get_latest_goal(target_traj, target_steps);
-    int goalposeX = target_traj[latest_goal];
-    int goalposeY = target_traj[latest_goal+target_steps];
+    int goalposeX = target_traj[latest_goal-num_goals_passsed];
+    int goalposeY = target_traj[latest_goal+target_steps-num_goals_passsed];
 
+    if (goalposeX == robotposeX && goalposeY == robotposeY)
+    {
+        num_goals_passsed++;
+        goalposeX = target_traj[latest_goal-num_goals_passsed];
+        goalposeY = target_traj[latest_goal+target_steps-num_goals_passsed];
+        if (!is_map_index_valid(goalposeX, goalposeY)){
+            num_goals_passsed--;
+            goalposeX = target_traj[latest_goal-num_goals_passsed];
+            goalposeY = target_traj[latest_goal+target_steps-num_goals_passsed];
+        }
+    }
     // printf("goal: %d %d\n", goalposeX, goalposeY);
 
     std::vector<int> g_values = init_gvalues(x_size, y_size);
