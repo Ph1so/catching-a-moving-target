@@ -5,6 +5,11 @@
  *=================================================================*/
 #include "planner.h"
 #include <math.h>
+#include <stdio.h>
+#include <limits.h>
+#include <vector>
+#include <queue>
+#include <set>
 
 #define GETMAPINDEX(X, Y, XSIZE, YSIZE) ((Y-1)*XSIZE + (X-1))
 
@@ -17,6 +22,12 @@
 #endif
 
 #define NUMOFDIRS 8
+
+std::vector<int> init_gvalues(int x_size, int y_size)
+{
+    const int INF = std::numeric_limits<int>::max();
+    return std::vector<int>(x_size * y_size, INF);
+}
 
 void planner(
     int* map,
@@ -38,17 +49,43 @@ void planner(
         return (map[idx] >= 0) && (map[idx] < collision_thresh);
     };
 
+    auto get_index = [&](int y, int x) -> int {
+        return y * x_size + x;
+    };
+
+    auto calc_heuristic = [&](int node_index) -> int {
+        return node_index;
+    };
+
+    auto calc_cost = [&](int node_index) -> int {
+        return calc_heuristic(node_index);
+    };
+
     // 8-connected grid
     int dX[NUMOFDIRS] = {-1, -1, -1,  0,  0,  1, 1, 1};
     int dY[NUMOFDIRS] = {-1,  0,  1, -1,  1, -1, 0, 1};
-    
-    // for now greedily move towards the final target position,
-    // but this is where you can put your planner
 
-    int goalposeX = target_traj[target_steps-1];
-    int goalposeY = target_traj[target_steps-1+target_steps];
-    // printf("robot: %d %d;\n", robotposeX, robotposeY);
-    // printf("goal: %d %d;\n", goalposeX, goalposeY);
+    int goalposeX = target_traj[curr_time+1];
+    int goalposeY = target_traj[curr_time+target_steps+1];
+    printf("goal: %d %d;\n", goalposeX, goalposeY);
+
+    std::vector<int> g_values = init_gvalues(x_size, y_size);
+
+    int S_goal = get_index(goalposeY, goalposeX);
+    int S_start = get_index(robotposeY, robotposeX);
+
+    using State = std::pair<int, int>;  // (cost, node)
+
+    std::priority_queue<State, std::vector<State>, std::greater<State>> open_list;
+    std::set<int> closed_list;
+
+    open_list.push({calc_cost(S_start), S_start});
+
+    while (!open_list.empty())
+    {
+        continue;
+    }
+
 
     int bestX = 0, bestY = 0; // robot will not move if greedy action leads to collision
     double olddisttotarget = (double)sqrt(((robotposeX-goalposeX)*(robotposeX-goalposeX) + (robotposeY-goalposeY)*(robotposeY-goalposeY)));
@@ -72,10 +109,13 @@ void planner(
             }
         }
     }
+
+
     robotposeX = robotposeX + bestX;
     robotposeY = robotposeY + bestY;
     action_ptr[0] = robotposeX;
     action_ptr[1] = robotposeY;
     
+    printf("\n");
     return;
 }
