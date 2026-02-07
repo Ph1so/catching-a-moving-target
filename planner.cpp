@@ -61,6 +61,13 @@ void planner(
         return GETMAPINDEX(x, y, x_size, y_size);
     };
 
+    auto get_latest_goal = [&](int* target_traj, int target_steps) -> int {
+        for (int i = target_steps-1; i > 0; i--)
+        {
+            if (is_map_index_valid(target_traj[i], target_traj[i+target_steps])) return i;
+        }
+    };
+
     auto calc_heuristic = [&](int node_index, int node_goal) -> int {
         int x_start = GETXFROMINDEX(node_index, x_size);
         int y_start = GETYFROMINDEX(node_index, x_size);
@@ -97,10 +104,11 @@ void planner(
         int y = GETYFROMINDEX(node_index, x_size);
         return (int)map[GETMAPINDEX(x,y,x_size,y_size)];
     };
+    int latest_goal = get_latest_goal(target_traj, target_steps);
+    int goalposeX = target_traj[latest_goal];
+    int goalposeY = target_traj[latest_goal+target_steps];
 
-    int goalposeX = target_traj[curr_time];
-    int goalposeY = target_traj[curr_time+target_steps];
-    // printf("goal: %d %d;\n", goalposeX, goalposeY);
+    // printf("goal: %d %d\n", goalposeX, goalposeY);
 
     std::vector<int> g_values = init_gvalues(x_size, y_size);
 
@@ -119,7 +127,7 @@ void planner(
     while (!open_list.empty())
     {
         // remove s with smallest g value from OPEN
-        auto [f, s] = open_list.top();
+        int s = open_list.top().second;
         open_list.pop();
 
         // add s to CLOSED
@@ -156,7 +164,8 @@ void planner(
     // printf("is valid move: %d\n", is_map_index_valid(GETXFROMINDEX(cur, x_size), GETYFROMINDEX(cur, x_size)));
     action_ptr[0] = GETXFROMINDEX(cur, x_size);
     action_ptr[1] = GETYFROMINDEX(cur, x_size);
-    
+
+    // printf("move: %d %d \n", GETXFROMINDEX(cur, x_size),  GETYFROMINDEX(cur, x_size));
     // printf("\n");
     return;
 }
