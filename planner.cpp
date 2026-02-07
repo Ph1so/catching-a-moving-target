@@ -68,6 +68,7 @@ void planner(
         {
             if (is_map_index_valid(target_traj[i], target_traj[i+target_steps])) return i;
         }
+        return 0;
     };
 
     auto calc_heuristic = [&](int node_index, int node_goal) -> int {
@@ -106,7 +107,7 @@ void planner(
         int y = GETYFROMINDEX(node_index, x_size);
         return (int)map[GETMAPINDEX(x,y,x_size,y_size)];
     };
-    
+
     int latest_goal = get_latest_goal(target_traj, target_steps);
     int goalposeX = target_traj[latest_goal-num_goals_passsed];
     int goalposeY = target_traj[latest_goal+target_steps-num_goals_passsed];
