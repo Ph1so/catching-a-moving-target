@@ -33,6 +33,11 @@ void planner(
     int* action_ptr
     )
 {
+    auto is_map_index_valid = [&](int newx, int newy) -> bool {
+        int idx = GETMAPINDEX(newx, newy, x_size, y_size);
+        return (map[idx] >= 0) && (map[idx] < collision_thresh);
+    };
+
     // 8-connected grid
     int dX[NUMOFDIRS] = {-1, -1, -1,  0,  0,  1, 1, 1};
     int dY[NUMOFDIRS] = {-1,  0,  1, -1,  1, -1, 0, 1};
@@ -55,7 +60,7 @@ void planner(
 
         if (newx >= 1 && newx <= x_size && newy >= 1 && newy <= y_size)
         {
-            if ((map[GETMAPINDEX(newx,newy,x_size,y_size)] >= 0) && (map[GETMAPINDEX(newx,newy,x_size,y_size)] < collision_thresh))  //if free
+            if (is_map_index_valid(newx, newy))  //if free
             {
                 disttotarget = (double)sqrt(((newx-goalposeX)*(newx-goalposeX) + (newy-goalposeY)*(newy-goalposeY)));
                 if(disttotarget < olddisttotarget)
