@@ -54,11 +54,15 @@ void planner(
     };
 
     auto calc_heuristic = [&](int node_index) -> int {
-        return node_index;
+        return node_index; // TODO
     };
 
     auto calc_cost = [&](int node_index) -> int {
-        return calc_heuristic(node_index);
+        return calc_heuristic(node_index); // TODO
+    };
+
+    auto get_neighbors = [&](int node_index) -> std::vector<int> {
+        return;
     };
 
     // 8-connected grid
@@ -83,7 +87,25 @@ void planner(
 
     while (!open_list.empty())
     {
-        continue;
+        // remove s with smallest g value from OPEN
+        auto [g, node] = open_list.top();
+        open_list.pop();
+
+        // add s to CLOSED
+        closed_list.insert(node);
+
+        // for every neighbor s` of s such that s` is not in CLOSED
+            //  if g(s’) > g(s) + c(s,s’)
+            // g(s’) = g(s) + c(s,s’);
+            // insert s’ into OPEN;
+
+        std::vector<int> neighbors = get_neighbors(node);
+        for (int i : neighbors)
+        {
+            if (closed_list.find(i) == closed_list.end()) {
+                continue;
+            }
+        }
     }
 
 
