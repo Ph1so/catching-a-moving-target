@@ -28,6 +28,7 @@
 #define NUMOFDIRS 8
 
 int num_goals_passsed = 1;
+int huersitic_type = 2;
 
 std::vector<int> init_gvalues(int x_size, int y_size)
 {
@@ -71,16 +72,22 @@ void planner(
         return 0;
     };
 
-    auto calc_heuristic = [&](int node_index, int node_goal) -> int {
+    auto calc_heuristic = [&](int node_index, int node_goal, int type) -> int {
         int x_start = GETXFROMINDEX(node_index, x_size);
         int y_start = GETYFROMINDEX(node_index, x_size);
         int x_end   = GETXFROMINDEX(node_goal,  x_size);
         int y_end   = GETYFROMINDEX(node_goal,  x_size);
-
         int dx = x_start - x_end;
         int dy = y_start - y_end;
-
-        return static_cast<int>(std::sqrt(dx*dx + dy*dy));
+        // Euclidean Distance
+        if (type == 1){
+            return static_cast<int>(std::sqrt(dx*dx + dy*dy));
+        }
+        // Chebyshev 
+        else if (type == 2) {
+            return std::max(abs(dx), abs(dy));
+        }
+        else return 0;
     };
 
     auto get_neighbors = [&](int node_index) -> std::vector<int> {
@@ -136,7 +143,7 @@ void planner(
     std::set<int> closed_list;
 
     g_values[S_start] = 0;
-    open_list.push({calc_heuristic(S_start, S_goal), S_start});
+    open_list.push({calc_heuristic(S_start, S_goal, huersitic_type), S_start});
     std::vector<int> parent(x_size*y_size, -1);
 
     while (!open_list.empty())
@@ -164,7 +171,7 @@ void planner(
                 {
                     g_values[s_p] = cost;
                     int new_g = cost;
-                    int f = new_g + calc_heuristic(s_p, S_goal);
+                    int f = new_g + calc_heuristic(s_p, S_goal, huersitic_type);
                     open_list.push({f, s_p});
                     parent[s_p] = s;
                 }

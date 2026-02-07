@@ -44,7 +44,7 @@ def parse_robot_trajectory_file(filename):
     return robot_traj
 
 
-SPEEDUP = 10
+SPEEDUP = 1
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
