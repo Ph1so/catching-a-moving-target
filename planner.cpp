@@ -13,6 +13,10 @@
 
 #define GETMAPINDEX(X, Y, XSIZE, YSIZE) ((Y-1)*XSIZE + (X-1))
 
+#define GETXFROMINDEX(IDX, XSIZE) (((IDX) % (XSIZE)) + 1)
+#define GETYFROMINDEX(IDX, XSIZE) (((IDX) / (XSIZE)) + 1)
+
+
 #if !defined(MAX)
 #define	MAX(A, B)	((A) > (B) ? (A) : (B))
 #endif
@@ -44,6 +48,10 @@ void planner(
     int* action_ptr
     )
 {
+    // 8-connected grid
+    int dX[NUMOFDIRS] = {-1, -1, -1,  0,  0,  1, 1, 1};
+    int dY[NUMOFDIRS] = {-1,  0,  1, -1,  1, -1, 0, 1};
+
     auto is_map_index_valid = [&](int newx, int newy) -> bool {
         int idx = GETMAPINDEX(newx, newy, x_size, y_size);
         return (map[idx] >= 0) && (map[idx] < collision_thresh);
@@ -53,17 +61,37 @@ void planner(
         return GETMAPINDEX(x, y, x_size, y_size);
     };
 
-    auto calc_heuristic = [&](int node_index) -> int {
-        return node_index; // TODO
-    };
+    auto calc_heuristic = [&](int node_index, int node_goal) -> int {
+        int x_start = GETXFROMINDEX(node_index, x_size);
+        int y_start = GETYFROMINDEX(node_index, x_size);
+        int x_end   = GETXFROMINDEX(node_goal,  x_size);
+        int y_end   = GETYFROMINDEX(node_goal,  x_size);
 
-    auto calc_cost = [&](int node_index) -> int {
-        return calc_heuristic(node_index); // TODO
+        int dx = x_start - x_end;
+        int dy = y_start - y_end;
+
+        return static_cast<int>(std::sqrt(dx*dx + dy*dy));
     };
 
     auto get_neighbors = [&](int node_index) -> std::vector<int> {
-        return; // TODO
+        std::vector<int> neighbors;
+
+        int x = GETXFROMINDEX(node_index, x_size);
+        int y = GETYFROMINDEX(node_index, x_size); 
+
+        for (int dir = 0; dir < NUMOFDIRS; dir++) {
+            int nx = x + dX[dir];
+            int ny = y + dY[dir];
+
+            if (nx < 1 || nx > x_size || ny < 1 || ny > y_size) continue;
+            if (!is_map_index_valid(nx, ny)) continue;
+
+            neighbors.push_back(GETMAPINDEX(nx, ny, x_size, y_size));
+        }
+
+        return neighbors;
     };
+
 
     auto calc_g = [&](int node_index) -> int {
         return node_index; // TODO
@@ -76,10 +104,6 @@ void planner(
     auto set_g = [&](int s_p, int s) -> void {
         return; // TODO
     };
-
-    // 8-connected grid
-    int dX[NUMOFDIRS] = {-1, -1, -1,  0,  0,  1, 1, 1};
-    int dY[NUMOFDIRS] = {-1,  0,  1, -1,  1, -1, 0, 1};
 
     int goalposeX = target_traj[curr_time+1];
     int goalposeY = target_traj[curr_time+target_steps+1];
@@ -95,7 +119,7 @@ void planner(
     std::priority_queue<State, std::vector<State>, std::greater<State>> open_list;
     std::set<int> closed_list;
 
-    open_list.push({calc_cost(S_start), S_start});
+    open_list.push({0, S_start});
 
     while (!open_list.empty())
     {
@@ -118,7 +142,7 @@ void planner(
                 if (calc_g(s_p) > calc_g(s) + calc_c(s, s_p))
                 {
                     set_g(s_p, s);
-                    open_list.push({calc_heuristic(s_p), s_p});
+                    open_list.push({calc_heuristic(s_p, S_goal), s_p});
                 }
             }
         }
