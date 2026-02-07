@@ -92,17 +92,10 @@ void planner(
         return neighbors;
     };
 
-
-    auto calc_g = [&](int node_index) -> int {
-        return node_index; // TODO
-    };
-
-    auto calc_c = [&](int node_index1, int node_index2) -> int {
-        return node_index1; // TODO
-    };
-
-    auto set_g = [&](int s_p, int s) -> void {
-        return; // TODO
+    auto calc_cost = [&](int node_index) -> int {
+        int x = GETXFROMINDEX(node_index, x_size);
+        int y = GETYFROMINDEX(node_index, x_size);
+        return (int)map[GETMAPINDEX(x,y,x_size,y_size)];
     };
 
     int goalposeX = target_traj[curr_time+1];
@@ -116,7 +109,7 @@ void planner(
 
     using State = std::pair<int, int>;  // (cost, node)
 
-    std::priority_queue<State, std::vector<State>, std::greater<State>> open_list;
+    std::priority_queue<State, std::vector<State>, std::greater<State>> open_list; // make sure priority is right
     std::set<int> closed_list;
 
     open_list.push({0, S_start});
@@ -139,9 +132,9 @@ void planner(
         for (int s_p : neighbors)
         {
             if (closed_list.find(s_p) == closed_list.end()) {
-                if (calc_g(s_p) > calc_g(s) + calc_c(s, s_p))
+                if (g_values[s_p] > g_values[s] + calc_cost(s_p))
                 {
-                    set_g(s_p, s);
+                    g_values[s_p] = g_values[s] + calc_cost(s_p);
                     open_list.push({calc_heuristic(s_p, S_goal), s_p});
                 }
             }
