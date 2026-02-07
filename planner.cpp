@@ -104,20 +104,22 @@ void planner(
 
     std::vector<int> g_values = init_gvalues(x_size, y_size);
 
-    int S_goal = get_index(goalposeY, goalposeX);
-    int S_start = get_index(robotposeY, robotposeX);
+    int S_goal = get_index(goalposeX, goalposeY);
+    int S_start = get_index(robotposeX, robotposeY);
 
     using State = std::pair<int, int>;  // (cost, node)
 
     std::priority_queue<State, std::vector<State>, std::greater<State>> open_list; // make sure priority is right
     std::set<int> closed_list;
 
-    open_list.push({0, S_start});
+    g_values[S_start] = 0;
+    open_list.push({calc_heuristic(S_start, S_goal), S_start});
+    std::vector<int> parent(x_size*y_size, -1);
 
     while (!open_list.empty())
     {
         // remove s with smallest g value from OPEN
-        auto [g, s] = open_list.top();
+        auto [f, s] = open_list.top();
         open_list.pop();
 
         // add s to CLOSED
@@ -127,49 +129,32 @@ void planner(
             //  if g(s’) > g(s) + c(s,s’)
             // g(s’) = g(s) + c(s,s’);
             // insert s’ into OPEN;
+        if (s == S_goal) break;
 
         std::vector<int> neighbors = get_neighbors(s);
         for (int s_p : neighbors)
         {
             if (closed_list.find(s_p) == closed_list.end()) {
-                if (g_values[s_p] > g_values[s] + calc_cost(s_p))
+                int cost = g_values[s] + calc_cost(s_p);
+                if (g_values[s_p] > cost)
                 {
-                    g_values[s_p] = g_values[s] + calc_cost(s_p);
-                    open_list.push({calc_heuristic(s_p, S_goal), s_p});
+                    g_values[s_p] = cost;
+                    int new_g = cost;
+                    int f = new_g + calc_heuristic(s_p, S_goal);
+                    open_list.push({f, s_p});
+                    parent[s_p] = s;
                 }
             }
         }
     }
 
-
-    int bestX = 0, bestY = 0; // robot will not move if greedy action leads to collision
-    double olddisttotarget = (double)sqrt(((robotposeX-goalposeX)*(robotposeX-goalposeX) + (robotposeY-goalposeY)*(robotposeY-goalposeY)));
-    double disttotarget;
-    for(int dir = 0; dir < NUMOFDIRS; dir++)
-    {
-        int newx = robotposeX + dX[dir];
-        int newy = robotposeY + dY[dir];
-
-        if (newx >= 1 && newx <= x_size && newy >= 1 && newy <= y_size)
-        {
-            if (is_map_index_valid(newx, newy))  //if free
-            {
-                disttotarget = (double)sqrt(((newx-goalposeX)*(newx-goalposeX) + (newy-goalposeY)*(newy-goalposeY)));
-                if(disttotarget < olddisttotarget)
-                {
-                    olddisttotarget = disttotarget;
-                    bestX = dX[dir];
-                    bestY = dY[dir];
-                }
-            }
-        }
+    int cur = S_goal;
+    while (parent[cur] != -1 && parent[cur] != S_start) {
+        cur = parent[cur];
     }
 
-
-    robotposeX = robotposeX + bestX;
-    robotposeY = robotposeY + bestY;
-    action_ptr[0] = robotposeX;
-    action_ptr[1] = robotposeY;
+    action_ptr[0] = GETXFROMINDEX(cur, x_size);
+    action_ptr[1] = GETYFROMINDEX(cur, x_size);
     
     printf("\n");
     return;
