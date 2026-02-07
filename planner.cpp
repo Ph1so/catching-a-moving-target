@@ -6,7 +6,7 @@
 #include "planner.h"
 #include <math.h>
 #include <stdio.h>
-#include <limits.h>
+#include <limits>
 #include <vector>
 #include <queue>
 #include <set>
@@ -49,8 +49,8 @@ void planner(
         return (map[idx] >= 0) && (map[idx] < collision_thresh);
     };
 
-    auto get_index = [&](int y, int x) -> int {
-        return y * x_size + x;
+    auto get_index = [&](int x, int y) -> int {
+        return GETMAPINDEX(x, y, x_size, y_size);
     };
 
     auto calc_heuristic = [&](int node_index) -> int {
@@ -62,7 +62,19 @@ void planner(
     };
 
     auto get_neighbors = [&](int node_index) -> std::vector<int> {
-        return;
+        return; // TODO
+    };
+
+    auto calc_g = [&](int node_index) -> int {
+        return node_index; // TODO
+    };
+
+    auto calc_c = [&](int node_index1, int node_index2) -> int {
+        return node_index1; // TODO
+    };
+
+    auto set_g = [&](int s_p, int s) -> void {
+        return; // TODO
     };
 
     // 8-connected grid
@@ -88,22 +100,26 @@ void planner(
     while (!open_list.empty())
     {
         // remove s with smallest g value from OPEN
-        auto [g, node] = open_list.top();
+        auto [g, s] = open_list.top();
         open_list.pop();
 
         // add s to CLOSED
-        closed_list.insert(node);
+        closed_list.insert(s);
 
         // for every neighbor s` of s such that s` is not in CLOSED
             //  if g(s’) > g(s) + c(s,s’)
             // g(s’) = g(s) + c(s,s’);
             // insert s’ into OPEN;
 
-        std::vector<int> neighbors = get_neighbors(node);
-        for (int i : neighbors)
+        std::vector<int> neighbors = get_neighbors(s);
+        for (int s_p : neighbors)
         {
-            if (closed_list.find(i) == closed_list.end()) {
-                continue;
+            if (closed_list.find(s_p) == closed_list.end()) {
+                if (calc_g(s_p) > calc_g(s) + calc_c(s, s_p))
+                {
+                    set_g(s_p, s);
+                    open_list.push({calc_heuristic(s_p), s_p});
+                }
             }
         }
     }
