@@ -1,7 +1,10 @@
 # catching-a-moving-target
 
+## Strategy 1:
+Perform A* Search on last node of target trajectory. When the robot gets to the last node, follow the path until it intercepts the target.
+
 <img src="baseline_2.gif" width="50%">
-## RESULT
+### RESULT
 
 target caught = 1
 
@@ -13,7 +16,7 @@ path cost = 2882
 
 <img src="myGIF.gif" width="50%">
 
-## RESULT
+### RESULT
 
 target_steps = 5245
 
