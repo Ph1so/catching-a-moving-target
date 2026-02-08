@@ -1,6 +1,6 @@
 # catching-a-moving-target
 
-<img src="baseline.gif" width="50%">
+<img src="baseline_2.gif" width="50%">
 ## RESULT
 
 target caught = 1
