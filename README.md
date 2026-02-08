@@ -10,3 +10,17 @@ time taken (s) = 2882
 moves made = 2882
 
 path cost = 2882
+
+<img src="myGIF.gif" width="50%">
+
+## RESULT
+
+target_steps = 5245
+
+target caught = 0
+
+time taken (s) = 5244
+
+moves made = 3958
+
+path cost = 8306796
