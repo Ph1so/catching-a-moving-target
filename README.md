@@ -1,30 +1,17 @@
 # catching-a-moving-target
 
-## Strategy 1:
-Perform A* Search on last node of target trajectory. When the robot gets to the last node, follow the path until it intercepts the target.
+## Strategy 1: Trajectory Endpoint Intercept
+Perform **A* Search** on the last node of the target trajectory. Once the robot reaches the terminal node, it follows the path until it intercepts the target.
 
-<img src="baseline_2.gif" width="50%">
+### Performance Comparison
 
-### RESULT
+| Metric | Baseline Run | Baseline Run 2|
+| :--- | :---: | :---: |
+| **Visual** | <img src="baseline_2.gif" width="300"> | <img src="myGIF.gif" width="300"> |
+| **Target Caught** | 1 | 0 |
+| **Target Steps** | — | 5,245 |
+| **Time Taken (s)** | 2,882 | 5,244 |
+| **Moves Made** | 2,882 | 3,958 |
+| **Path Cost** | 2,882 | 8,306,796 |
 
-target caught = 1
-
-time taken (s) = 2882
-
-moves made = 2882
-
-path cost = 2882
-
-<img src="myGIF.gif" width="50%">
-
-### RESULT
-
-target_steps = 5245
-
-target caught = 0
-
-time taken (s) = 5244
-
-moves made = 3958
-
-path cost = 8306796
+---
