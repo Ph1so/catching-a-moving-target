@@ -10,6 +10,7 @@
 #include <vector>
 #include <queue>
 #include <set>
+#include <unordered_map>
 
 #define GETMAPINDEX(X, Y, XSIZE, YSIZE) ((Y-1)*XSIZE + (X-1))
 
@@ -29,6 +30,7 @@
 
 int num_goals_passsed = 1;
 int huersitic_type = 1;
+std::unordered_map<int, int> traj_index_mapping;
 
 /*=================================================================
  * NEW IDEA: iterate on each node on the traj that the target hasnt been to yet
@@ -128,6 +130,17 @@ void planner(
         return (int)map[GETMAPINDEX(x,y,x_size,y_size)];
     };
 
+    auto get_trajectory_indexs = [&]() -> std::set<int> {
+        std::set<int> list;
+        for (int i = 0; i < target_steps; i++)
+        {
+            int index = GETMAPINDEX(target_traj[i], target_traj[i + target_steps], x_size, y_size);
+            list.insert(index);
+            traj_index_mapping[index] = i;
+        }
+        return list;
+    };
+
     int latest_goal = get_latest_goal(target_traj, target_steps);
     int goalposeX = target_traj[latest_goal-num_goals_passsed];
     int goalposeY = target_traj[latest_goal+target_steps-num_goals_passsed];
@@ -146,24 +159,34 @@ void planner(
     // printf("goal: %d %d\n", goalposeX, goalposeY);
 
     std::vector<int> g_values = init_gvalues(x_size, y_size);
+    std::vector<int> steps(x_size * y_size, 0);
 
     int S_goal = get_index(goalposeX, goalposeY);
     int S_start = get_index(robotposeX, robotposeY);
 
     using State = std::pair<int, int>;  // (cost, node)
 
-    std::priority_queue<State, std::vector<State>, std::greater<State>> open_list; // make sure priority is right
+    std::priority_queue<State, std::vector<State>, std::greater<State>> open_list;
     std::set<int> closed_list;
+    std::set<int> trajectory_index_list = get_trajectory_indexs();
+    std::priority_queue<State, std::vector<State>, std::greater<State>> viable_trajectory_index_list;
 
+    // Perform A search throughout whole graph
     g_values[S_start] = 0;
-    open_list.push({calc_heuristic(S_start, S_goal, huersitic_type), S_start});
-    std::vector<int> parent(x_size*y_size, -1);
+    steps[S_start] = 0;
+    open_list.push({calc_cost(S_start), S_start});
 
-    while (!open_list.empty())
+    while (!open_list.empty() && !trajectory_index_list.empty())
     {
         // remove s with smallest g value from OPEN
         int s = open_list.top().second;
         open_list.pop();
+
+        if (trajectory_index_list.find(s) != trajectory_index_list.end()) 
+            trajectory_index_list.erase(s);
+
+        if (steps[s]  <= abs(traj_index_mapping[S_goal] - traj_index_mapping[s]) ) 
+            viable_trajectory_index_list.push({g_values[s], s});
 
         // add s to CLOSED
         if (closed_list.count(s)) continue;
@@ -173,32 +196,34 @@ void planner(
             //  if g(s’) > g(s) + c(s,s’)
             // g(s’) = g(s) + c(s,s’);
             // insert s’ into OPEN;
-        if (s == S_goal) break;
+
+        // if (s == S_goal) break; [Do full search instead of stopping]
 
         std::vector<int> neighbors = get_neighbors(s);
         for (int s_p : neighbors)
         {
-            if (closed_list.find(s_p) == closed_list.end() && is_map_index_valid(GETXFROMINDEX(s_p, x_size), GETYFROMINDEX(s_p, x_size))) {
+            if (closed_list.find(s_p) == closed_list.end() && 
+                is_map_index_valid(GETXFROMINDEX(s_p, x_size), GETYFROMINDEX(s_p, x_size))) 
+            {
                 int cost = g_values[s] + calc_cost(s_p);
                 if (g_values[s_p] > cost)
                 {
                     g_values[s_p] = cost;
-                    int new_g = cost;
-                    int f = new_g + calc_heuristic(s_p, S_goal, huersitic_type);
-                    open_list.push({f, s_p});
-                    parent[s_p] = s;
+                    steps[s_p] = steps[s] + 1;
+                    open_list.push({cost, s_p});
                 }
             }
         }
     }
 
-    int cur = S_goal;
-    while (parent[cur] != -1 && parent[cur] != S_start) {
-        cur = parent[cur];
-    }
+    // int cur = S_goal;
+    // while (parent[cur] != -1 && parent[cur] != S_start) {
+    //     cur = parent[cur];
+    // }
+
     // printf("is valid move: %d\n", is_map_index_valid(GETXFROMINDEX(cur, x_size), GETYFROMINDEX(cur, x_size)));
-    action_ptr[0] = GETXFROMINDEX(cur, x_size);
-    action_ptr[1] = GETYFROMINDEX(cur, x_size);
+    // action_ptr[0] = GETXFROMINDEX(cur, x_size);
+    // action_ptr[1] = GETYFROMINDEX(cur, x_size);
 
     // printf("move: %d %d \n", GETXFROMINDEX(cur, x_size),  GETYFROMINDEX(cur, x_size));
     // printf("\n");
