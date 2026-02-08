@@ -84,5 +84,5 @@ if __name__ == "__main__":
                         interval=1)
 
     plt.legend()
-    ani.save("myGIF.gif")
+    ani.save("baseline.gif")
     plt.show()
