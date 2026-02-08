@@ -4,6 +4,7 @@
 Perform A* Search on last node of target trajectory. When the robot gets to the last node, follow the path until it intercepts the target.
 
 <img src="baseline_2.gif" width="50%">
+
 ### RESULT
 
 target caught = 1
