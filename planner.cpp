@@ -28,7 +28,7 @@
 #define NUMOFDIRS 8
 
 int num_goals_passsed = 1;
-int huersitic_type = 2;
+int huersitic_type = 1;
 
 std::vector<int> init_gvalues(int x_size, int y_size)
 {

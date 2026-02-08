@@ -200,6 +200,7 @@ int main(int argc, char *argv[])
     output_file.close();
 
     std::cout << "\nRESULT" << std::endl;
+    std::cout << "target_steps = " << target_steps << std::endl;
     std::cout << "target caught = " << caught << std::endl;
     std::cout << "time taken (s) = " << curr_time << std::endl;
     std::cout << "moves made = " << numofmoves << std::endl;
