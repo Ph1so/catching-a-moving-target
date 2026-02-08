@@ -30,7 +30,6 @@
 
 int num_goals_passsed = 1;
 int huersitic_type = 1;
-std::unordered_map<int, int> traj_index_mapping;
 
 /*=================================================================
  * NEW IDEA: iterate on each node on the traj that the target hasnt been to yet
@@ -130,7 +129,7 @@ void planner(
         return (int)map[GETMAPINDEX(x,y,x_size,y_size)];
     };
 
-    auto get_trajectory_indexs = [&]() -> std::set<int> {
+    auto get_trajectory_indexs = [&](std::unordered_map<int, int> &traj_index_mapping) -> std::set<int> {
         std::set<int> list;
         for (int i = 0; i < target_steps; i++)
         {
@@ -157,9 +156,28 @@ void planner(
         }
     }
     // printf("goal: %d %d\n", goalposeX, goalposeY);
+    const int INITIAL_CAPACITY = 8000000; 
+    const int INF = std::numeric_limits<int>::max();
 
-    std::vector<int> g_values = init_gvalues(x_size, y_size);
-    std::vector<int> steps(x_size * y_size, 0);
+    // Static variables persist across calls, so we only allocate once [cite: 17]
+    static std::vector<int> g_values(INITIAL_CAPACITY, INF);
+    static std::vector<int> steps(INITIAL_CAPACITY, INF);
+    static std::vector<int> parent(INITIAL_CAPACITY, -1);
+
+    int current_map_size = x_size * y_size;
+
+    // If a custom map exceeds our initial guess, resize it once [cite: 101, 102]
+    if (current_map_size > g_values.size()) {
+        g_values.resize(current_map_size, INF);
+        steps.resize(current_map_size, INF);
+        parent.resize(current_map_size, -1);
+    }
+
+    // Reset ONLY the area used by the current map [cite: 39, 40]
+    std::fill(g_values.begin(), g_values.begin() + current_map_size, INF);
+    std::fill(steps.begin(), steps.begin() + current_map_size, INF);
+    std::fill(parent.begin(), parent.begin() + current_map_size, -1);
+    
 
     int S_goal = get_index(goalposeX, goalposeY);
     int S_start = get_index(robotposeX, robotposeY);
@@ -168,7 +186,8 @@ void planner(
 
     std::priority_queue<State, std::vector<State>, std::greater<State>> open_list;
     std::set<int> closed_list;
-    std::set<int> trajectory_index_list = get_trajectory_indexs();
+    std::unordered_map<int, int> traj_index_mapping;
+    std::set<int> trajectory_index_list = get_trajectory_indexs(traj_index_mapping);
     std::priority_queue<State, std::vector<State>, std::greater<State>> viable_trajectory_index_list;
 
     // Perform A search throughout whole graph
@@ -185,9 +204,18 @@ void planner(
         if (trajectory_index_list.find(s) != trajectory_index_list.end()) 
             trajectory_index_list.erase(s);
 
-        if (steps[s]  <= abs(traj_index_mapping[S_goal] - traj_index_mapping[s]) ) 
-            viable_trajectory_index_list.push({g_values[s], s});
+        if (traj_index_mapping.count(s)) {
+            int t_target_at_s = traj_index_mapping[s];
+            int t_robot_at_s = curr_time + steps[s];
 
+            // If robot arrives before or exactly when the target is there
+            if (t_robot_at_s <= t_target_at_s) {
+                int wait_steps = t_target_at_s - t_robot_at_s;
+                int total_intercept_cost = g_values[s] + (wait_steps * calc_cost(s));
+                
+                viable_trajectory_index_list.push({total_intercept_cost, s});
+            }
+        }
         // add s to CLOSED
         if (closed_list.count(s)) continue;
         closed_list.insert(s);
