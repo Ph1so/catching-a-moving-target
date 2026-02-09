@@ -15,20 +15,3 @@ Perform **A* Search** on the last node of the target trajectory. Once the robot 
 | **Path Cost** | 2,882 | 8,306,796 |
 
 ---
-
-## Strategy 2: Reverse A search 
-
-todo
-
-### Performance Comparison
-
-| Metric | Baseline Run | Baseline Run 2|
-| :--- | :---: | :---: |
-| **Visual** | <img src="reverse_A_g1_.gif" width="300"> | <img src="reverse_A_g2_.gif" width="300"> |
-| **Target Caught** | 1 | 1 |
-| **Target Steps** | 5345 | 5245 |
-| **Time Taken (s)** | 2640 | 5012 |
-| **Moves Made** | 2639 | 1529 |
-| **Path Cost** | 2640 | 1,993,887 |
-
----
