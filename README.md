@@ -9,7 +9,7 @@ Perform **A* Search** on the last node of the target trajectory. Once the robot 
 | :--- | :---: | :---: |
 | **Visual** | <img src="baseline_2.gif" width="300"> | <img src="myGIF.gif" width="300"> |
 | **Target Caught** | 1 | 0 |
-| **Target Steps** | — | 5,245 |
+| **Target Steps** | 2,882 | 5,245 |
 | **Time Taken (s)** | 2,882 | 5,244 |
 | **Moves Made** | 2,882 | 3,958 |
 | **Path Cost** | 2,882 | 8,306,796 |
@@ -26,9 +26,9 @@ todo
 | :--- | :---: | :---: |
 | **Visual** | <img src="reverse_A_g1_.gif" width="300"> | <img src="reverse_A_g2_.gif" width="300"> |
 | **Target Caught** | 1 | 1 |
-| **Target Steps** | 5345 | 5245 |
-| **Time Taken (s)** | 2640 | 5012 |
-| **Moves Made** | 2639 | 1529 |
-| **Path Cost** | 2640 | 1,993,887 |
+| **Target Steps** | 5,345 | 5,245 |
+| **Time Taken (s)** | 2,640 | 5,012 |
+| **Moves Made** | 2,639 | 1,529 |
+| **Path Cost** | 2,640 | 1,993,887 |
 
 ---
