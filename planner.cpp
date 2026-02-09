@@ -32,7 +32,7 @@ int num_goals_passsed = 1;
 int huersitic_type = 1;
 
 /*=================================================================
- * NEW IDEA: iterate on each node on the traj that the target hasnt been to yet
+ * REVERSE A STRATEGY: iterate on each node on the traj that the target hasnt been to yet
  * and get the cost for the robot to travel to that node and intercept the target
  * choose the best node to intercept the target at
  * 
