@@ -239,19 +239,20 @@ void planner(
                     g_values[s_p] = cost;
                     steps[s_p] = steps[s] + 1;
                     open_list.push({cost, s_p});
+                    parent[s_p] = s;
                 }
             }
         }
     }
 
-    // int cur = S_goal;
-    // while (parent[cur] != -1 && parent[cur] != S_start) {
-    //     cur = parent[cur];
-    // }
+    int cur = viable_trajectory_index_list.top().second;
+    while (parent[cur] != -1 && parent[cur] != S_start) {
+        cur = parent[cur];
+    }
 
     // printf("is valid move: %d\n", is_map_index_valid(GETXFROMINDEX(cur, x_size), GETYFROMINDEX(cur, x_size)));
-    // action_ptr[0] = GETXFROMINDEX(cur, x_size);
-    // action_ptr[1] = GETYFROMINDEX(cur, x_size);
+    action_ptr[0] = GETXFROMINDEX(cur, x_size);
+    action_ptr[1] = GETYFROMINDEX(cur, x_size);
 
     // printf("move: %d %d \n", GETXFROMINDEX(cur, x_size),  GETYFROMINDEX(cur, x_size));
     // printf("\n");
