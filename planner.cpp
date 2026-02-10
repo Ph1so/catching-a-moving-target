@@ -43,6 +43,9 @@ int huersitic_type = 1;
  * Method: Perform one A search until all points on the target's trajectory has been
  * expanded. Filter out points that don't meet the above constraint. Choose the least
  * cost point based on the A search
+ * 
+ * UPDATE: Now supports waiting at intermediate cells. The planner considers waiting
+ * at any cell along the path if it reduces total cost.
  *=================================================================*/
 
 std::vector<int> init_gvalues(int x_size, int y_size)
@@ -88,7 +91,6 @@ void planner(
     static std::vector<int> g_values(INITIAL_CAPACITY, INF);
     static std::vector<int> steps(INITIAL_CAPACITY, INF);
     static std::vector<int> parent(INITIAL_CAPACITY, -1);
-    // Replace unordered_map with a static O(1) lookup array for speed
     static std::vector<int> traj_lookup(INITIAL_CAPACITY, -1); 
 
     int current_map_size = x_size * y_size;
@@ -104,7 +106,7 @@ void planner(
     std::fill(steps.begin(), steps.begin() + current_map_size, INF);
     std::fill(parent.begin(), parent.begin() + current_map_size, -1);
     
-    // Fill trajectory lookup and count unique nodes
+    // fill trajectory lookup and count unique nodes
     int traj_nodes_left = 0;
     for (int i = 0; i < target_steps; i++) {
         int idx = GETMAPINDEX(target_traj[i], target_traj[i + target_steps], x_size, y_size);
@@ -116,7 +118,18 @@ void planner(
     using State = std::pair<int, int>;  
     std::priority_queue<State, std::vector<State>, std::greater<State>> open_list;
     std::vector<bool> closed_list(current_map_size, false);
-    std::priority_queue<State, std::vector<State>, std::greater<State>> viable_trajectory_index_list;
+    
+    // store best intercept option
+    struct InterceptOption {
+        int total_cost;
+        int intercept_node;
+        int wait_node;
+        
+        bool operator>(const InterceptOption& other) const {
+            return total_cost > other.total_cost;
+        }
+    };
+    std::priority_queue<InterceptOption, std::vector<InterceptOption>, std::greater<InterceptOption>> viable_options;
 
     g_values[S_start] = 0;
     steps[S_start] = 0;
@@ -130,7 +143,7 @@ void planner(
         if (closed_list[s]) continue;
         closed_list[s] = true;
 
-        // O(1) trajectory check instead of O(log N) set search
+        // check if this is a trajectory node
         if (traj_lookup[s] != -1) {
             traj_nodes_left--;
             int t_target_at_s = traj_lookup[s];
@@ -138,8 +151,34 @@ void planner(
 
             if (t_robot_at_s <= t_target_at_s) {
                 int wait_steps = t_target_at_s - t_robot_at_s;
-                int total_intercept_cost = g_values[s] + (wait_steps * calc_cost(s));
-                viable_trajectory_index_list.push({total_intercept_cost, s});
+                
+                // Option 1: wait at the intercept node itself
+                int total_cost_wait_here = g_values[s] + (wait_steps * calc_cost(s));
+                viable_options.push({total_cost_wait_here, s, s});
+                
+                // Option 2: or wait at any node along the path to s
+                int cur = s;
+                int accumulated_cost = g_values[s];
+                int path_steps = steps[s];
+                
+                while (parent[cur] != -1) {
+                    int prev = parent[cur];
+                    accumulated_cost -= calc_cost(cur);
+                    path_steps--;
+                    
+                    int t_robot_at_prev = curr_time + path_steps;
+                    if (t_robot_at_prev <= t_target_at_s) {
+                        int wait_at_prev = t_target_at_s - t_robot_at_prev;
+                        int cost_to_prev = accumulated_cost;
+                        int wait_cost = wait_at_prev * calc_cost(prev);
+                        int move_cost_to_intercept = g_values[s] - g_values[prev];
+                        int total_cost_wait_at_prev = cost_to_prev + wait_cost + move_cost_to_intercept;
+                        
+                        viable_options.push({total_cost_wait_at_prev, s, prev});
+                    }
+                    
+                    cur = prev;
+                }
             }
         }
 
@@ -166,8 +205,11 @@ void planner(
         }
     }
 
-    if (!viable_trajectory_index_list.empty()) {
-        int cur = viable_trajectory_index_list.top().second;
+    if (!viable_options.empty()) {
+        InterceptOption best = viable_options.top();
+        int wait_node = best.wait_node;
+        
+        int cur = wait_node;
         while (parent[cur] != -1 && parent[cur] != S_start) {
             cur = parent[cur];
         }
@@ -178,7 +220,7 @@ void planner(
         action_ptr[1] = robotposeY;
     }
 
-    // Reset trajectory lookup for next call
+    // reset trajectory lookup for next call
     for (int i = 0; i < target_steps; i++) {
         int idx = GETMAPINDEX(target_traj[i], target_traj[i + target_steps], x_size, y_size);
         traj_lookup[idx] = -1;

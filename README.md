@@ -18,7 +18,7 @@ Perform **A* Search** on the last node of the target trajectory. Once the robot 
 
 ## Strategy 2: Reverse A search 
 
-todo
+This planer performs an A search with no huerisitc. It continues to expand cells until all the cells on the target's trajectory have been expanded. When it expands a target trajectory cell, it checks if the robot can reach the cell in time before the target gets there, if so the cost of getting to that cell is added into a priority queue. If the robot gets to the spot early, the cost of waiting in that cell is calculated and added to the origonal cost. After it has expanded all target trajectory cells, it pops the cell with the lowest cost and backtracks on a vector list of parents in order to get the next move to make. Origonally, I used maps, sets, and vectors to keep track of my data, however this proved to be extremely slow. So I changed them all to vectors significantly imrpoved the time effecianecy. For exmaple on grad map2, one iteration would take 2000> ms, this change in data structures dropped the time to 300ms. 
 
 ### Performance Comparison
 
