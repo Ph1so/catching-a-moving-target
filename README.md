@@ -21,15 +21,15 @@ This strategy performs **A\*** search to the final node of the target’s trajec
 
 ---
 
-## Strategy 2: Reverse A* Search (No Heuristic)
+## Strategy 2: Reverse uninformed A Search (No Heuristic)
 
-This planner performs a reverse A* search **without a heuristic**. It continues expanding cells until all cells on the target’s trajectory have been expanded.
+This planner performs a reverse uninformed A search **without a heuristic**. It continues expanding cells until all cells on the target’s trajectory have been expanded.
 
 When a target trajectory cell is expanded, the planner checks whether the robot can reach that cell before the target arrives. If so, the cost to reach that cell is added to a priority queue. If the robot arrives early, the cost of waiting at that cell is calculated and added to the total cost.
 
 After all trajectory cells have been expanded, the planner selects the lowest-cost candidate from the priority queue and backtracks using a parent vector to determine the next move.
 
-Originally, maps, sets, and vectors were used to store planner data, but this proved to be extremely slow. Replacing all data structures with vectors significantly improved performance. For example, on **grad/map2**, a single iteration originally took over **2000 ms**, while the optimized version runs in approximately **300 ms**.
+Originally, maps, sets, and vectors were used to store planner data, but this proved to be extremely slow. Replacing all data structures with vectors significantly improved performance. For example, on **grad/map2**, a single iteration originally took over **2000 ms**, while the optimized version runs in approximately **300 - 400ms**.
 
 ### Performance Comparison
 
@@ -44,11 +44,13 @@ Originally, maps, sets, and vectors were used to store planner data, but this pr
 
 ---
 
-## Strategy 3: Reverse A* Search with Waiting (Time-Expanded)
+## Strategy 3: Reverse uninformed A Search with Waiting (Time-Expanded)
 
 This strategy extends Strategy 2 by adding **time as a third dimension** in the search space. This allows the planner to explicitly choose to **wait in place** rather than making a movement at every step.
 
-Allowing wait actions significantly improves interception performance by enabling the robot to arrive at optimal interception points exactly when the target does.
+Allowing wait actions significantly improves interception performance by enabling the robot to arrive at optimal interception points exactly when the target does. 
+
+However, this brought the planning time from 300-400ms to 800-900ms (using /grad/map2.txt as refrence)
 
 ### Performance Comparison
 
