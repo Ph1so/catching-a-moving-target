@@ -4,7 +4,20 @@ This document describes the planning strategies I developed to intercept a movin
 
 > **Note on Evaluation:** While this document outlines the evolution of the project, **Strategy 3** represents the final optimized approach. Strategies 1 and 2 are included for comparative analysis and to document the development process.
 
----
+## Compilation and Execution
+
+The planner can be compiled using the standard command as there are no external dependencies:
+`g++ runtest.cpp planner.cpp`
+
+For more efficient testing, I have included a shell script, `run.sh`, which automates the compilation, execution, and visualization steps into a single command. 
+
+### Usage:
+Run the script followed by the student type (`g` for grad or `u` for undergrad) and the map number.
+
+**Example:**
+```bash
+./run.sh g 2
+```
 
 ## Strategy 1: Trajectory Endpoint Intercept
 
