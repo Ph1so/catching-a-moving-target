@@ -205,6 +205,12 @@ void planner(
         }
     }
 
+    /*
+        add check to see if there is any intercept option at all
+        question: what to do if this is the case
+            -   choose the option that minimizes distance and hope that the next step will have an intercept option?
+    */
+
     if (!viable_options.empty()) {
         InterceptOption best = viable_options.top();
         int wait_node = best.wait_node;
@@ -216,8 +222,10 @@ void planner(
         action_ptr[0] = GETXFROMINDEX(cur, x_size);
         action_ptr[1] = GETYFROMINDEX(cur, x_size);
     } else {
-        action_ptr[0] = robotposeX;
-        action_ptr[1] = robotposeY;
+        int dx = (targetposeX > robotposeX) ? 1 : ((targetposeX < robotposeX) ? -1 : 0);
+        int dy = (targetposeY > robotposeY) ? 1 : ((targetposeY < robotposeY) ? -1 : 0);
+        action_ptr[0] = robotposeX + dx;
+        action_ptr[1] = robotposeY + dy;
     }
 
     // reset trajectory lookup for next call

@@ -35,7 +35,7 @@ Originally, maps, sets, and vectors were used to store planner data, but this pr
 
 | Metric | Baseline Run | Baseline Run 2 |
 | :--- | :---: | :---: |
-| **Visual** | <img src="reverse_A_g1_.gif" width="300"> | <img src="reverse_A_g2_.gif" width="300"> |
+| **Visual** | <img src="./gifs/reverse_A_g1_.gif" width="300"> | <img src="./gifs/reverse_A_g2_.gif" width="300"> |
 | **Target Caught** | 1 | 1 |
 | **Target Steps** | 5,345 | 5,245 |
 | **Time Taken (s)** | 2,640 | 5,012 |
@@ -91,6 +91,12 @@ More experiments were run for this strategy because it consistently produced the
 ---
 
 <img src="final_g5.gif" width="300">
+
+- target_steps = 182  
+- target_caught = 1  
+- time_taken (s) = 175  
+- moves_made = 175  
+- path_cost = 4,977  
 
 ---
 
