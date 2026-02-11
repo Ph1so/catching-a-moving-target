@@ -32,22 +32,6 @@
 int num_goals_passsed = 1;
 int huersitic_type = 1;
 
-/*=================================================================
- * REVERSE A STRATEGY: iterate on each node on the traj that the target hasnt been to yet
- * and get the cost for the robot to travel to that node and intercept the target
- * choose the best node to intercept the target at
- * 
- * Constraint: node_i (node to intercept the target) subtracted by the current node
- * the target is at is the number of time steps that the robot has to plan for
- * 
- * Method: Perform one A search until all points on the target's trajectory has been
- * expanded. Filter out points that don't meet the above constraint. Choose the least
- * cost point based on the A search
- * 
- * UPDATE: Now supports waiting at intermediate cells. The planner considers waiting
- * at any cell along the path if it reduces total cost.
- *=================================================================*/
-
 std::vector<int> init_gvalues(int x_size, int y_size)
 {
     const int INF = std::numeric_limits<int>::max();
@@ -204,12 +188,6 @@ void planner(
             }
         }
     }
-
-    /*
-        add check to see if there is any intercept option at all
-        question: what to do if this is the case
-            -   choose the option that minimizes distance and hope that the next step will have an intercept option?
-    */
 
     if (!viable_options.empty()) {
         InterceptOption best = viable_options.top();
