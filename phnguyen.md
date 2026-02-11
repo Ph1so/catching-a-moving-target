@@ -2,6 +2,8 @@
 
 This document describes the planning strategies I developed to intercept a moving target on a grid. It outlines how the approaches evolved over time and evaluates each strategy using both visual results and quantitative performance metrics.
 
+> **Note on Evaluation:** While this document outlines the evolution of the project, **Strategy 3** represents the final optimized approach. Strategies 1 and 2 are included for comparative analysis and to document the development process.
+
 ---
 
 ## Strategy 1: Trajectory Endpoint Intercept
