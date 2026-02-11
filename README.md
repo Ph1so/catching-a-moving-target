@@ -33,9 +33,9 @@ Originally, maps, sets, and vectors were used to store planner data, but this pr
 
 ### Performance Comparison
 
-| Metric | Baseline Run | Baseline Run 2 |
+| Metric | Baseline Run | Baseline Run 2|
 | :--- | :---: | :---: |
-| **Visual** | <img src="./gifs/reverse_A_g1_.gif" width="300"> | <img src="./gifs/reverse_A_g2_.gif" width="300"> |
+| **Visual** | <img src="reverse_A_g1_.gif" width="300"> | <img src="reverse_A_g2_.gif" width="300"> |
 | **Target Caught** | 1 | 1 |
 | **Target Steps** | 5,345 | 5,245 |
 | **Time Taken (s)** | 2,640 | 5,012 |
